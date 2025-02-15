@@ -15,7 +15,7 @@ app.use(express.json());
 
 // 📌 Connexion à MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ Connexion réussie à MongoDB Atlas !'))
+  .then(() => console.log('Connexion réussie à MongoDB Atlas !'))
   .catch(err => console.error('❌ Erreur de connexion à MongoDB :', err));
 
 // 📌 Déclaration des routes API

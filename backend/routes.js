@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const router = express.Router();
 
-// 📌 Route d'inscription (Register)
+// Route d'inscription (Register)
 router.post('/auth/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -27,12 +27,12 @@ router.post('/auth/register', async (req, res) => {
         res.status(201).json({ message: 'Utilisateur créé avec succès' });
 
     } catch (error) {
-        console.error("❌ Erreur lors de l'inscription :", error); // Log de l'erreur
+        console.error("Erreur lors de l'inscription :", error); // Log de l'erreur
         res.status(500).json({ error: "Erreur lors de l'inscription", details: error.message });
     }
 });
 
-// 📌 Route de connexion (Login)
+// Route de connexion (Login)
 router.post('/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -49,7 +49,7 @@ router.post('/auth/login', async (req, res) => {
     }
 });
 
-// 📌 Middleware de vérification du token JWT
+// Middleware de vérification du token JWT
 export const authMiddleware = (req, res, next) => {
     console.log("🔍 Headers reçus :", req.headers); // Ajout du log pour voir tous les headers
 
@@ -65,7 +65,7 @@ export const authMiddleware = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
-        console.log("✅ Token décodé :", decoded);
+        console.log("Token décodé :", decoded);
         next();
     } catch (error) {
         return res.status(401).json({ error: 'Token invalide' });
@@ -73,7 +73,7 @@ export const authMiddleware = (req, res, next) => {
 };
 
 router.get('/protected', authMiddleware, (req, res) => {
-    res.json({ message: "✅ Accès autorisé", user: req.user });
+    res.json({ message: "Accès autorisé", user: req.user });
 });
 
 export default router;
