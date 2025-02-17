@@ -1,6 +1,6 @@
 import express from 'express';
 import { Catway } from './models.js';
-import { authMiddleware } from './routes.js';
+import { authMiddleware, isAdmin } from './routes.js';
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ router.get('/catways', async (req, res) => {
 });
 
 // Ajouter un catway (Protégé)
-router.post('/catways', authMiddleware, async (req, res) => {
+router.post('/catways', authMiddleware, isAdmin, async (req, res) => {
     try {
         const catway = new Catway(req.body);
         await catway.save();
@@ -26,7 +26,7 @@ router.post('/catways', authMiddleware, async (req, res) => {
 });
 
 // Supprimer un catway (Protégé)
-router.delete('/catways/:id', authMiddleware, async (req, res) => {
+router.delete('/catways/:id', authMiddleware, isAdmin, async (req, res) => {
     try {
         await Catway.findByIdAndDelete(req.params.id);
         res.json({ message: "Catway supprimé avec succès" });

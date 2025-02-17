@@ -1,38 +1,52 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from './models.js'; // Assure-toi que User est bien défini dans models.js
 import dotenv from 'dotenv';
+import { User } from './models.js'; // Assure-toi que ce chemin est correct
 
 dotenv.config();
+
 const router = express.Router();
 
-// Route d'inscription (Register)
+// 📌 Middleware de vérification du token JWT
+export const authMiddleware = (req, res, next) => {
+    const token = req.header('Authorization')?.split(' ')[1];
+    if (!token) return res.status(403).json({ error: 'Accès interdit' });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(401).json({ error: 'Token invalide' });
+    }
+};
+
+// 📌 Route d'inscription (Register) (⚠️ Supprime `authMiddleware` ici)
 router.post('/auth/register', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role } = req.body;
 
-        // Vérifier si l'utilisateur existe déjà
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: "Cet email est déjà utilisé" });
         }
 
-        // Hasher le mot de passe
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ name, email, password: hashedPassword });
+        const assignedRole = role === "admin" ? "admin" : "user"; // Vérification du rôle
 
-        // Sauvegarde dans la base de données
+        const user = new User({ name, email, password: hashedPassword, role: assignedRole });
         await user.save();
-        res.status(201).json({ message: 'Utilisateur créé avec succès' });
+
+        res.status(201).json({ message: 'Utilisateur créé avec succès', user });
 
     } catch (error) {
-        console.error("Erreur lors de l'inscription :", error); // Log de l'erreur
-        res.status(500).json({ error: "Erreur lors de l'inscription", details: error.message });
+        console.error("❌ Erreur lors de l'inscription :", error);
+        res.status(500).json({ error: "Erreur lors de l'inscription" });
     }
 });
 
-// Route de connexion (Login)
+// 📌 Route de connexion (Login)
 router.post('/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -42,38 +56,23 @@ router.post('/auth/login', async (req, res) => {
             return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
         }
 
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token });
+        const token = jwt.sign(
+            { userId: user._id, role: user.role }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '1h' }
+        );
+
+        res.json({ token, role: user.role });
+
     } catch (error) {
         res.status(500).json({ error: 'Erreur lors de la connexion' });
     }
 });
-
-// Middleware de vérification du token JWT
-export const authMiddleware = (req, res, next) => {
-    console.log("🔍 Headers reçus :", req.headers); // Ajout du log pour voir tous les headers
-
-    const authHeader = req.header('Authorization'); // Vérifie bien la majuscule "Authorization"
-    console.log("🔍 Header Authorization :", authHeader);
-
-    if (!authHeader) {
-        return res.status(403).json({ error: 'Accès interdit (Aucun token reçu)' });
+// 📌 Middleware pour vérifier si l'utilisateur est admin
+export const isAdmin = (req, res, next) => {
+    if (!req.user || req.user.role !== "admin") {
+        return res.status(403).json({ error: "Accès refusé : Administrateur requis" });
     }
-
-    const token = authHeader.split(' ')[1]; // Extraire le token après "Bearer"
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-        console.log("Token décodé :", decoded);
-        next();
-    } catch (error) {
-        return res.status(401).json({ error: 'Token invalide' });
-    }
+    next();
 };
-
-router.get('/protected', authMiddleware, (req, res) => {
-    res.json({ message: "Accès autorisé", user: req.user });
-});
-
 export default router;

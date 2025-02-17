@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 
-// Modèle utilisateur
+// Modèle utilisateur avec rôle
 const UserSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
-});
-
-export const User = mongoose.model('User', UserSchema);
+    password: { type: String, required: true },
+    role: { type: String, enum: ["admin", "user"], default: "user" } // Ajout du rôle
+  });
+  
+  export const User = mongoose.model("User", UserSchema);
 
 // Modèle des Catways
 const CatwaySchema = new mongoose.Schema({
