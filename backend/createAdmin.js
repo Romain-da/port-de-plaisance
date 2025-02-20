@@ -8,11 +8,11 @@ dotenv.config();
 const createAdmin = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
-        console.log("✅ Connexion réussie à MongoDB");
+        console.log("Connexion réussie à MongoDB");
 
         const existingAdmin = await User.findOne({ email: "admin@example.com" });
         if (existingAdmin) {
-            console.log("⚠️ L'administrateur existe déjà !");
+            console.log("L'administrateur existe déjà !");
             process.exit(0);
         }
 
@@ -26,10 +26,10 @@ const createAdmin = async () => {
         });
 
         await admin.save();
-        console.log("✅ Administrateur créé avec succès !");
+        console.log("Administrateur créé avec succès !");
         process.exit(0);
     } catch (error) {
-        console.error("❌ Erreur lors de la création de l'Admin :", error);
+        console.error("Erreur lors de la création de l'Admin :", error);
         process.exit(1);
     }
 };

@@ -10,15 +10,30 @@ router.get('/reservations', async (req, res) => {
         const reservations = await Reservation.find();
         res.json(reservations);
     } catch (error) {
+        console.error("❌ Erreur lors de la récupération des réservations :", error);
         res.status(500).json({ error: "Erreur lors de la récupération des réservations" });
     }
 });
 
 // Ajouter une réservation (Protégé)
-router.post('/reservations', authMiddleware, isAdmin, async (req, res) => {
+router.post('/reservations', authMiddleware, async (req, res) => {
     try {
-        const reservation = new Reservation(req.body);
+        const { catwayNumber, clientName, boatName, checkIn, checkOut } = req.body;
+
+        // Vérifier si le catway est disponible
+        const catway = await Catway.findOne({ catwayNumber, catwayState: "disponible" });
+        if (!catway) {
+            return res.status(400).json({ error: "Ce catway n'est pas disponible" });
+        }
+
+        // Créer la réservation
+        const reservation = new Reservation({ catwayNumber, clientName, boatName, checkIn, checkOut });
         await reservation.save();
+
+        // Mettre à jour le catway comme "occupé"
+        catway.catwayState = "occupé";
+        await catway.save();
+
         res.status(201).json(reservation);
     } catch (error) {
         res.status(500).json({ error: "Erreur lors de l'ajout de la réservation" });
@@ -26,26 +41,35 @@ router.post('/reservations', authMiddleware, isAdmin, async (req, res) => {
 });
 
 // Supprimer une réservation (Protégé)
-router.delete('/reservations/:id', authMiddleware, isAdmin, async (req, res) => {
+router.delete('/reservations/:id', authMiddleware, async (req, res) => {
     try {
-        await Reservation.findByIdAndDelete(req.params.id);
-        res.json({ message: "Réservation supprimée avec succès" });
+        const reservation = await Reservation.findById(req.params.id);
+        if (!reservation) {
+            return res.status(404).json({ error: "Réservation non trouvée" });
+        }
+
+        // Libérer le catway en le remettant à "disponible"
+        const catway = await Catway.findOne({ catwayNumber: reservation.catwayNumber });
+        if (catway) {
+            catway.catwayState = "disponible";
+            await catway.save();
+        }
+
+        // Supprimer la réservation
+        await reservation.deleteOne();
+        res.json({ message: "Réservation supprimée et catway libéré" });
     } catch (error) {
         res.status(500).json({ error: "Erreur lors de la suppression de la réservation" });
     }
 });
 
-// 📌 Route pour mettre à jour une réservation (Admin uniquement)
+// Mettre à jour une réservation (Admin uniquement)
 router.put("/reservations/:id", authMiddleware, isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         console.log("🔍 ID reçu pour mise à jour :", id);
 
-        const updatedReservation = await Reservation.findByIdAndUpdate(
-            id,
-            req.body,
-            { new: true }
-        );
+        const updatedReservation = await Reservation.findByIdAndUpdate(id, req.body, { new: true });
 
         if (!updatedReservation) {
             return res.status(404).json({ error: "Réservation non trouvée" });
@@ -55,6 +79,26 @@ router.put("/reservations/:id", authMiddleware, isAdmin, async (req, res) => {
     } catch (error) {
         console.error("❌ Erreur lors de la mise à jour :", error);
         res.status(500).json({ error: "Erreur serveur" });
+    }
+});
+
+router.put('/reservations/:id/finish', authMiddleware, async (req, res) => {
+    try {
+        const reservation = await Reservation.findById(req.params.id);
+        if (!reservation) {
+            return res.status(404).json({ error: "Réservation non trouvée" });
+        }
+
+        // Libérer le catway
+        const catway = await Catway.findOne({ catwayNumber: reservation.catwayNumber });
+        if (catway) {
+            catway.catwayState = "disponible";
+            await catway.save();
+        }
+
+        res.json({ message: "Réservation terminée et catway libéré" });
+    } catch (error) {
+        res.status(500).json({ error: "Erreur lors de la validation de la fin de la réservation" });
     }
 });
 

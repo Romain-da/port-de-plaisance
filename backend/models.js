@@ -13,9 +13,11 @@ const UserSchema = new mongoose.Schema({
 // Modèle des Catways
 const CatwaySchema = new mongoose.Schema({
     catwayNumber: { type: Number, required: true, unique: true },
+    catwayName: { type: String, required: true }, // 🔥 Ajout du champ
     type: { type: String, enum: ['long', 'short'], required: true },
     catwayState: { type: String, required: true }
 });
+
 export const Catway = mongoose.model('Catway', CatwaySchema);
 
 // Modèle des Réservations
