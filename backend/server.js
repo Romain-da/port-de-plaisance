@@ -10,27 +10,18 @@ import userRoutes from "./user.routes.js";
 dotenv.config();
 const app = express();
 
-// CORS configuré pour autoriser les requêtes du frontend et gérer les credentials (cookies, tokens, etc.)
-app.use(cors({
-  origin: ["http://localhost:3000", "https://port-de-plaisance-d81r.onrender.com"], // Mettre ici l'origine exacte du frontend
+// Configuration correcte de CORS
+const corsOptions = {
+  origin: [
+    "http://localhost:3000", // Pour développement local
+    "https://port-de-plaisance-d81r.onrender.com" // URL du frontend en production
+  ],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-  credentials: true // Permet d'envoyer des cookies et headers d'authentification
-}));
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  credentials: true // Permet l'envoi de cookies et headers d'authentification
+};
 
-// Middleware global pour les requêtes préflight OPTIONS (CORS)
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // ⚠️ Pas "*"
-  res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true"); // Autoriser les cookies et tokens
-  
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+app.use(cors(corsOptions));
 
 // Middleware pour JSON
 app.use(express.json());
@@ -46,8 +37,8 @@ app.use("/api", catwayRoutes);
 app.use("/api", reservationRoutes);
 app.use("/api", userRoutes);
 
-// 🚀 Démarrer le serveur
+// Démarrer le serveur
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`));
 
 export default app;
