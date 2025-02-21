@@ -10,7 +10,7 @@ import userRoutes from "./user.routes.js";
 dotenv.config();
 const app = express();
 
-// Configuration correcte de CORS
+// Configuration stricte de CORS
 const corsOptions = {
   origin: [
     "http://localhost:3000", // Dev local
@@ -18,15 +18,28 @@ const corsOptions = {
   ],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-  credentials: true // Permet l'envoi de cookies et headers d'authentification
+  credentials: true, // Permet l'envoi des cookies et headers d'authentification
 };
 
+// Utilisation du middleware CORS pour toutes les routes
 app.use(cors(corsOptions));
 
-// Middleware pour gérer les requêtes préflight (OPTIONS)
-app.options("*", cors(corsOptions)); 
+// Middleware manuel pour s'assurer que CORS est appliqué à toutes les réponses
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
 
-// Middleware pour JSON
+  // Répondre directement aux requêtes préflight OPTIONS
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
+// Middleware pour traiter les requêtes JSON
 app.use(express.json());
 
 // Connexion à MongoDB
@@ -40,7 +53,7 @@ app.use("/api", catwayRoutes);
 app.use("/api", reservationRoutes);
 app.use("/api", userRoutes);
 
-// Démarrer le serveur
+// Lancement du serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`));
 
