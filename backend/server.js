@@ -12,7 +12,7 @@ const app = express();
 
 // CORS configuré pour autoriser les requêtes du frontend et gérer les credentials (cookies, tokens, etc.)
 app.use(cors({
-  origin: "http://localhost:3000", // Mettre ici l'origine exacte du frontend
+  origin: ["http://localhost:3000", "https://port-de-plaisance-d81r.onrender.com"], // Mettre ici l'origine exacte du frontend
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
   credentials: true // Permet d'envoyer des cookies et headers d'authentification
