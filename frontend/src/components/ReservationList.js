@@ -17,14 +17,18 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
 
     // Ajouter une réservation
     const handleAddReservation = async () => {
+        console.log("Données envoyées :", newReservation); //Vérifie dans la console
+    
         try {
             const response = await axios.post(`${API_BASE_URL}/api/reservations`, newReservation, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+    
+            console.log("Réponse API :", response.data);
             setReservations([...reservations, response.data]);
             setNewReservation({ catwayNumber: "", clientName: "", boatName: "", checkIn: "", checkOut: "" });
         } catch (error) {
-            console.error("Erreur lors de l'ajout de la réservation", error);
+            console.error("Erreur lors de l'ajout de la réservation :", error.response?.data || error.message);
         }
     };
 

@@ -20,23 +20,20 @@ router.post('/reservations', authMiddleware, async (req, res) => {
     try {
         const { catwayNumber, clientName, boatName, checkIn, checkOut } = req.body;
 
-        // Vérifier si le catway est disponible
-        const catway = await Catway.findOne({ catwayNumber, catwayState: "disponible" });
-        if (!catway) {
-            return res.status(400).json({ error: "Ce catway n'est pas disponible" });
+        if (!catwayNumber || !clientName || !boatName || !checkIn || !checkOut) {
+            return res.status(400).json({ error: "Tous les champs sont obligatoires" });
         }
 
-        // Créer la réservation
         const reservation = new Reservation({ catwayNumber, clientName, boatName, checkIn, checkOut });
         await reservation.save();
 
-        // Mettre à jour le catway comme "occupé"
-        catway.catwayState = "occupé";
-        await catway.save();
+        // Mise à jour du catway en "occupé"
+        await Catway.findOneAndUpdate({ catwayNumber }, { catwayState: "occupé" });
 
         res.status(201).json(reservation);
     } catch (error) {
-        res.status(500).json({ error: "Erreur lors de l'ajout de la réservation" });
+        console.error("Erreur lors de l'ajout de la réservation :", error);
+        res.status(500).json({ error: "Erreur lors de l'ajout de la réservation", details: error.message });
     }
 });
 
