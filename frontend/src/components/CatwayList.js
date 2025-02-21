@@ -93,6 +93,16 @@ const CatwayList = ({ token, catways, setCatways, role }) => {
                             onChange={(e) => setNewCatway({ ...newCatway, catwayName: e.target.value })}
                         />
                     </Form.Group>
+                    <Form.Group>
+                        <Form.Label>Type</Form.Label>
+                        <Form.Select
+                            value={newCatway.type}
+                            onChange={(e) => setNewCatway({ ...newCatway, type: e.target.value })}
+                        >
+                            <option value="long">Long</option>
+                            <option value="short">Short</option>
+                        </Form.Select>
+                    </Form.Group>
                     <Button className="mt-2" onClick={handleAddCatway}>Ajouter</Button>
                 </Form>
             )}
