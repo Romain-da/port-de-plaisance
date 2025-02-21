@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { Container, Button, Card, Row, Col } from "react-bootstrap";
 import UserList from "./UserList";
+import API_BASE_URL from "../config";
 
 const Dashboard = ({ token }) => {
     const [catways, setCatways] = useState([]);
@@ -45,18 +46,18 @@ const Dashboard = ({ token }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const catwayRes = await axios.get("http://localhost:5000/api/catways", {
+                const catwayRes = await axios.get(`${API_BASE_URL}/api/catways`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setCatways(catwayRes.data);
 
-                const reservationRes = await axios.get("http://localhost:5000/api/reservations", {
+                const reservationRes = await axios.get(`${API_BASE_URL}/reservations`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setReservations(reservationRes.data);
 
                 if (role === "admin") {
-                    const userRes = await axios.get("http://localhost:5000/api/users", {
+                    const userRes = await axios.get(`${API_BASE_URL}/api/users`, {
                         headers: { Authorization: `Bearer ${token}` },
                     });
                     setUsers(userRes.data);

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Table, Card, Form } from "react-bootstrap";
 import axios from "axios";
+import API_BASE_URL from "../config";
 
 const CatwayList = ({ token, catways, setCatways, role }) => {
     const [editingCatway, setEditingCatway] = useState(null);
@@ -18,7 +19,7 @@ const CatwayList = ({ token, catways, setCatways, role }) => {
     // Ajouter un catway
     const handleAddCatway = async () => {
         try {
-            const response = await axios.post("http://localhost:5000/api/catways", newCatway, {
+            const response = await axios.post(`${API_BASE_URL}/api/catways`, newCatway, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setCatways([...catways, response.data]);
@@ -33,7 +34,7 @@ const CatwayList = ({ token, catways, setCatways, role }) => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce catway ?")) return;
 
         try {
-            await axios.delete(`http://localhost:5000/api/catways/${id}`, {
+            await axios.delete(`${API_BASE_URL}/api/catways/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setCatways(catways.filter((catway) => catway._id !== id));
@@ -54,7 +55,7 @@ const CatwayList = ({ token, catways, setCatways, role }) => {
 
         try {
             const response = await axios.put(
-                `http://localhost:5000/api/catways/${editingCatway}`,
+                `${API_BASE_URL}/api/catways/${editingCatway}`,
                 updatedCatway,
                 { headers: { Authorization: `Bearer ${token}` } }
             );

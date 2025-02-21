@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Container, Form, Button, Card, Alert } from "react-bootstrap";
+import API_BASE_URL from "../config";
 
 const Register = () => {
     const [user, setUser] = useState({
@@ -20,7 +21,7 @@ const Register = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("http://localhost:5000/api/auth/register", user);
+            await axios.post(`${API_BASE_URL}/api/auth/register`, user);
             alert("Inscription réussie ! Vous pouvez maintenant vous connecter.");
             navigate("/"); // Rediriger vers la page de connexion
         } catch (err) {

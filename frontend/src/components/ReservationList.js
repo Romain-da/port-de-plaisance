@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Table, Button, Form, Modal } from "react-bootstrap";
+import API_BASE_URL from "../config";
 
 const ReservationList = ({ token, reservations, setReservations, role }) => {
     const [newReservation, setNewReservation] = useState({
@@ -17,7 +18,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
     // Ajouter une réservation
     const handleAddReservation = async () => {
         try {
-            const response = await axios.post("http://localhost:5000/api/reservations", newReservation, {
+            const response = await axios.post(`${API_BASE_URL}/api/reservations`, newReservation, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setReservations([...reservations, response.data]);
@@ -33,7 +34,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
         if (!confirmation) return;
 
         try {
-            await axios.delete(`http://localhost:5000/api/reservations/${id}`, {
+            await axios.delete(`${API_BASE_URL}/api/reservations/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setReservations(reservations.filter((reservation) => reservation._id !== id));
@@ -52,7 +53,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
     const handleSaveReservation = async () => {
         try {
             const response = await axios.put(
-                `http://localhost:5000/api/reservations/${editingReservation}`,
+                `${API_BASE_URL}/api/reservations/${editingReservation}`,
                 updatedReservation,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -67,13 +68,13 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
     // Terminer une réservation (admin uniquement) et rendre le catway disponible
     const handleFinishReservation = async (id, catwayNumber) => {
         try {
-            await axios.put(`http://localhost:5000/api/reservations/${id}/finish`, {}, {
+            await axios.put(`${API_BASE_URL}/api/reservations/${id}/finish`, {}, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
             // Met à jour l'état du catway en "disponible"
             await axios.put(
-                `http://localhost:5000/api/catways/updateStatus/${catwayNumber}`,
+                `${API_BASE_URL}/api/catways/updateStatus/${catwayNumber}`,
                 { catwayState: "disponible" },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

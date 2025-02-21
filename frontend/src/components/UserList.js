@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Button, Form, Card } from "react-bootstrap";
+import API_BASE_URL from "../config";
 
 const UserList = ({ token }) => {
     const [users, setUsers] = useState([]);
@@ -12,7 +13,7 @@ const UserList = ({ token }) => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/users", {
+                const response = await axios.get(`${API_BASE_URL}/api/users`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUsers(response.data);
@@ -26,7 +27,7 @@ const UserList = ({ token }) => {
     // Ajouter un utilisateur
     const handleAddUser = async () => {
         try {
-            const response = await axios.post("http://localhost:5000/api/users", newUser, {
+            const response = await axios.post(`${API_BASE_URL}/api/users`, newUser, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUsers([...users, response.data]);
@@ -41,7 +42,7 @@ const UserList = ({ token }) => {
         if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) return;
 
         try {
-            await axios.delete(`http://localhost:5000/api/users/${id}`, {
+            await axios.delete(`${API_BASE_URL}/api/users/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUsers(users.filter((user) => user._id !== id));
@@ -62,7 +63,7 @@ const UserList = ({ token }) => {
 
         try {
             const response = await axios.put(
-                `http://localhost:5000/api/users/${editingUser}`,
+                `${API_BASE_URL}/api/users/${editingUser}`,
                 updatedUser,
                 { headers: { Authorization: `Bearer ${token}` } }
             );

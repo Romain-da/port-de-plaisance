@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from "../config";
 
 const Login = ({ setToken }) => {
     const [email, setEmail] = useState("");
@@ -11,7 +12,7 @@ const Login = ({ setToken }) => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:5000/api/auth/login", 
+            const response = await axios.post(`${API_BASE_URL}/api/auth/login`, 
               { email, password }, 
               { withCredentials: true } // Ajout pour envoyer le token avec CORS
             );
