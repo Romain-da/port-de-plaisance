@@ -51,7 +51,7 @@ const Dashboard = ({ token }) => {
                 });
                 setCatways(catwayRes.data);
 
-                const reservationRes = await axios.get(`${API_BASE_URL}/reservations`, {
+                const reservationRes = await axios.get(`${API_BASE_URL}/api/reservations`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setReservations(reservationRes.data);
