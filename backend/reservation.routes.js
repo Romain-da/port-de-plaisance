@@ -1,6 +1,7 @@
 import express from 'express';
 import { Reservation } from './models.js';
 import { authMiddleware, isAdmin } from './routes.js';
+import { Catway } from "./models.js";
 
 const router = express.Router();
 
@@ -20,20 +21,29 @@ router.post('/reservations', authMiddleware, async (req, res) => {
     try {
         const { catwayNumber, clientName, boatName, checkIn, checkOut } = req.body;
 
-        if (!catwayNumber || !clientName || !boatName || !checkIn || !checkOut) {
-            return res.status(400).json({ error: "Tous les champs sont obligatoires" });
+        // Vérifier si le catway existe
+        const catway = await Catway.findOne({ catwayNumber });
+        if (!catway) {
+            return res.status(400).json({ error: "Le catway sélectionné n'existe pas." });
         }
 
+        // Vérifier si le catway est disponible
+        if (catway.catwayState !== "disponible") {
+            return res.status(400).json({ error: "Le catway n'est pas disponible." });
+        }
+
+        // Créer la réservation
         const reservation = new Reservation({ catwayNumber, clientName, boatName, checkIn, checkOut });
         await reservation.save();
 
-        // Mise à jour du catway en "occupé"
-        await Catway.findOneAndUpdate({ catwayNumber }, { catwayState: "occupé" });
+        // Mettre à jour l'état du catway en "occupé"
+        catway.catwayState = "occupé";
+        await catway.save();
 
         res.status(201).json(reservation);
     } catch (error) {
         console.error("Erreur lors de l'ajout de la réservation :", error);
-        res.status(500).json({ error: "Erreur lors de l'ajout de la réservation", details: error.message });
+        res.status(500).json({ error: "Erreur lors de l'ajout de la réservation" });
     }
 });
 
