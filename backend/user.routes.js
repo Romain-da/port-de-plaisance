@@ -1,5 +1,5 @@
 import express from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { User } from "./models.js";
 import { authMiddleware, isAdmin } from "./routes.js"; // Assure-toi que ces middlewares existent
 
