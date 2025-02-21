@@ -13,14 +13,14 @@ const Login = ({ setToken }) => {
         try {
             const response = await axios.post("http://localhost:5000/api/auth/login", 
               { email, password }, 
-              { withCredentials: true } // ✅ Ajout pour envoyer le token avec CORS
+              { withCredentials: true } // Ajout pour envoyer le token avec CORS
             );
 
             if (response.data.token) {
                 localStorage.setItem("token", response.data.token);
                 localStorage.setItem("role", response.data.role);
                 setToken(response.data.token);
-                navigate("/dashboard"); // ✅ Redirection après connexion
+                navigate("/dashboard"); // Redirection après connexion
             } else {
                 setError("Erreur : Aucun token reçu !");
             }

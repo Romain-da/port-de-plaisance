@@ -14,7 +14,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
     const [editingReservation, setEditingReservation] = useState(null);
     const [updatedReservation, setUpdatedReservation] = useState({});
 
-    // ✅ Ajouter une réservation
+    // Ajouter une réservation
     const handleAddReservation = async () => {
         try {
             const response = await axios.post("http://localhost:5000/api/reservations", newReservation, {
@@ -27,7 +27,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
         }
     };
 
-    // ✅ Supprimer une réservation
+    // Supprimer une réservation
     const handleDeleteReservation = async (id) => {
         const confirmation = window.confirm("Êtes-vous sûr de vouloir supprimer cette réservation ?");
         if (!confirmation) return;
@@ -42,13 +42,13 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
         }
     };
 
-    // ✅ Ouvrir le modal de modification
+    // Ouvrir le modal de modification
     const handleEditReservation = (reservation) => {
         setEditingReservation(reservation._id);
         setUpdatedReservation({ ...reservation });
     };
 
-    // ✅ Sauvegarder la modification
+    // Sauvegarder la modification
     const handleSaveReservation = async () => {
         try {
             const response = await axios.put(
@@ -64,7 +64,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
         }
     };
 
-    // ✅ Terminer une réservation (admin uniquement) et rendre le catway disponible
+    // Terminer une réservation (admin uniquement) et rendre le catway disponible
     const handleFinishReservation = async (id, catwayNumber) => {
         try {
             await axios.put(`http://localhost:5000/api/reservations/${id}/finish`, {}, {
@@ -88,7 +88,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
         <div className="container">
             <h3>Liste des Réservations</h3>
 
-            {/* ✅ Ajout d'une réservation (uniquement admin) */}
+            {/* Ajout d'une réservation (uniquement admin) */}
             {role === "admin" && (
                 <Form className="mb-3">
                     <Form.Group>
@@ -117,7 +117,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
                 </Form>
             )}
 
-            {/* ✅ Tableau des réservations */}
+            {/* Tableau des réservations */}
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -151,7 +151,7 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
                 </tbody>
             </Table>
 
-            {/* ✅ Modal pour modifier une réservation */}
+            {/* Modal pour modifier une réservation */}
             <Modal show={!!editingReservation} onHide={() => setEditingReservation(null)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Modifier la réservation</Modal.Title>

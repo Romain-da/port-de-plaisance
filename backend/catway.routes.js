@@ -26,7 +26,7 @@ router.post('/catways', authMiddleware, isAdmin, async (req, res) => {
         await catway.save();
         res.status(201).json(catway);
     } catch (error) {
-        console.error("❌ Erreur lors de l'ajout du catway :", error);
+        console.error("Erreur lors de l'ajout du catway :", error);
         res.status(500).json({ error: "Erreur lors de l'ajout du catway", details: error.message });
     }
 });
@@ -40,7 +40,7 @@ router.delete('/catways/:id', authMiddleware, isAdmin, async (req, res) => {
         }
         res.json({ message: "Catway supprimé avec succès" });
     } catch (error) {
-        console.error("❌ Erreur lors de la suppression du catway :", error);
+        console.error("Erreur lors de la suppression du catway :", error);
         res.status(500).json({ error: "Erreur lors de la suppression du catway" });
     }
 });
@@ -57,7 +57,7 @@ router.put('/catways/:id', authMiddleware, isAdmin, async (req, res) => {
 
         res.json(updatedCatway);
     } catch (error) {
-        console.error("❌ Erreur lors de la modification du catway :", error);
+        console.error("Erreur lors de la modification du catway :", error);
         res.status(500).json({ error: "Erreur lors de la modification du catway" });
     }
 });

@@ -159,13 +159,13 @@ router.delete("/users/:id", authMiddleware, isAdmin, async (req, res) => {
 
 router.post('/catways', authMiddleware, isAdmin, async (req, res) => {
     try {
-        console.log("📩 Données reçues pour ajout de catway :", req.body); // Ajout du log
+        console.log("Données reçues pour ajout de catway :", req.body); // Ajout du log
 
         const catway = new Catway(req.body);
         await catway.save();
         res.status(201).json(catway);
     } catch (error) {
-        console.error("❌ Erreur lors de l'ajout du catway :", error);
+        console.error("Erreur lors de l'ajout du catway :", error);
         res.status(500).json({ error: "Erreur lors de l'ajout du catway", details: error.message });
     }
 });

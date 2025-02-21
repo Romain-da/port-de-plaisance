@@ -45,6 +45,6 @@ router.delete("/:id", authMiddleware, isAdmin, async (req, res) => {
     }
 });
 router.get("/test", (req, res) => {
-    res.send("✅ API User fonctionne !");
+    res.send("API User fonctionne !");
 });
 export default router;
