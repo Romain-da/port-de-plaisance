@@ -13,8 +13,8 @@ const app = express();
 // Configuration correcte de CORS
 const corsOptions = {
   origin: [
-    "http://localhost:3000", // Pour développement local
-    "https://port-de-plaisance-d81r.onrender.com" // URL du frontend en production
+    "http://localhost:3000", // Dev local
+    "https://port-de-plaisance-d81r.onrender.com" // Frontend en production
   ],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
@@ -22,6 +22,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Middleware pour gérer les requêtes préflight (OPTIONS)
+app.options("*", cors(corsOptions)); 
 
 // Middleware pour JSON
 app.use(express.json());
