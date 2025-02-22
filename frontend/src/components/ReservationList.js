@@ -70,22 +70,18 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
     };
 
     // Terminer une réservation (admin uniquement) et rendre le catway disponible
-    const handleFinishReservation = async (id, catwayNumber) => {
+    const handleFinishReservation = async (id) => {
         try {
-            await axios.put(`${API_BASE_URL}/api/reservations/${id}/finish`, {}, {
+            const response = await axios.put(`${API_BASE_URL}/api/reservations/${id}/finish`, {}, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
-            // Met à jour l'état du catway en "disponible"
-            await axios.put(
-                `${API_BASE_URL}/api/catways/updateStatus/${catwayNumber}`,
-                { catwayState: "disponible" },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            setReservations(reservations.filter(res => res._id !== id)); // Supprime la réservation terminée
+    
+            console.log("Réservation terminée :", response.data);
+    
+            // Mettre à jour la liste des réservations après suppression
+            setReservations(reservations.filter(res => res._id !== id));
         } catch (error) {
-            console.error("Erreur lors de la validation de la réservation", error);
+            console.error("Erreur lors de la validation de la réservation :", error.response?.data || error.message);
         }
     };
 

@@ -113,22 +113,30 @@ router.put('/reservations/:id/finish', authMiddleware, async (req, res) => {
 router.put("/reservations/:id/finish", authMiddleware, isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
+
+        // Vérifier si la réservation existe
         const reservation = await Reservation.findById(id);
         if (!reservation) {
             return res.status(404).json({ error: "Réservation non trouvée" });
         }
 
-        // Remettre le catway en disponible
-        await Catway.findOneAndUpdate(
-            { catwayNumber: reservation.catwayNumber },
-            { catwayState: "disponible" }
-        );
+        // Trouver le catway associé à la réservation
+        const catway = await Catway.findOne({ catwayNumber: reservation.catwayNumber });
+        if (!catway) {
+            return res.status(404).json({ error: "Catway non trouvé" });
+        }
 
+        // Modifier l'état du catway en "disponible"
+        catway.catwayState = "disponible";
+        await catway.save();
+
+        // Supprimer la réservation une fois terminée
         await Reservation.findByIdAndDelete(id);
 
         res.json({ message: "Réservation terminée et catway libéré" });
     } catch (error) {
-        res.status(500).json({ error: "Erreur lors de la fin de la réservation" });
+        console.error("Erreur lors de la finalisation de la réservation :", error);
+        res.status(500).json({ error: "Erreur lors de la finalisation de la réservation" });
     }
 });
 
