@@ -76,10 +76,9 @@ const ReservationList = ({ token, reservations, setReservations, role }) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
     
-            console.log("Réservation terminée :", response.data);
+            console.log("Réservation terminée :", response.data); // Affichage de la réponse API
     
-            // Mettre à jour la liste des réservations après suppression
-            setReservations(reservations.filter(res => res._id !== id));
+            setReservations(reservations.filter(res => res._id !== id)); // Suppression de la réservation terminée
         } catch (error) {
             console.error("Erreur lors de la validation de la réservation :", error.response?.data || error.message);
         }

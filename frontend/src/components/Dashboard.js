@@ -48,26 +48,29 @@ const Dashboard = ({ token }) => {
             try {
                 const catwayRes = await axios.get(`${API_BASE_URL}/api/catways`, {
                     headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true
                 });
                 setCatways(catwayRes.data);
-
+    
                 const reservationRes = await axios.get(`${API_BASE_URL}/api/reservations`, {
                     headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true
                 });
                 setReservations(reservationRes.data);
-
-                if (role === "admin") {
-                    const userRes = await axios.get(`${API_BASE_URL}/api/users`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    setUsers(userRes.data);
-                }
+    
+                const userRes = await axios.get(`${API_BASE_URL}/api/users`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true
+                });
+    
+                setUsers(userRes.data);
             } catch (error) {
-                console.error("Erreur lors de la récupération des données", error);
+                console.error("Erreur lors de la récupération des données", error.response?.data || error.message);
             }
         };
         fetchData();
-    }, [token, role]);
+    }, [token]);
+    
 
     return (
         <Container className="mt-4">

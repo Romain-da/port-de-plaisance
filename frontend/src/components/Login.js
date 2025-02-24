@@ -13,8 +13,8 @@ const Login = ({ setToken }) => {
         e.preventDefault();
         try {
             const response = await axios.post(`${API_BASE_URL}/api/auth/login`, 
-              { email, password }, 
-              { withCredentials: true } // Ajout pour envoyer le token avec CORS
+                { email, password },
+                { withCredentials: true } // Ajout pour l'authentification
             );
 
             if (response.data.token) {
@@ -26,7 +26,7 @@ const Login = ({ setToken }) => {
                 setError("Erreur : Aucun token reçu !");
             }
         } catch (err) {
-            setError("Email ou mot de passe incorrect.");
+            setError(err.response?.data?.message || "Email ou mot de passe incorrect.");
         }
     };
 

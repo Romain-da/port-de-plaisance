@@ -23,9 +23,9 @@ const Register = () => {
         try {
             await axios.post(`${API_BASE_URL}/api/auth/register`, user);
             alert("Inscription réussie ! Vous pouvez maintenant vous connecter.");
-            navigate("/"); // Rediriger vers la page de connexion
+            navigate("/"); // Redirection après inscription
         } catch (err) {
-            setError("Erreur lors de l'inscription. Vérifiez vos informations.");
+            setError(err.response?.data?.message || "Erreur lors de l'inscription.");
         }
     };
 
