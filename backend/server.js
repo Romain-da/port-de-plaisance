@@ -10,54 +10,74 @@ import userRoutes from "./user.routes.js";
 dotenv.config();
 const app = express();
 
-//Configuration stricte de CORS
+// Liste des origines autorisées (Frontend)
+const allowedOrigins = [
+    "http://localhost:3000",  // Dev local
+    "https://port-de-plaisance-d81r.onrender.com"  // Frontend en production
+];
+
+// Configuration CORS
 const corsOptions = {
-  origin: [
-    "http://localhost:3000", // Dev local
-    "https://port-de-plaisance-d81r.onrender.com" // Frontend en production
-  ],
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-  credentials: true, // Permet l'envoi des cookies et headers d'authentification
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.error(`❌ CORS bloqué pour cette origine : ${origin}`);
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+    credentials: true
 };
 
-// Activation globale de CORS
+// Activation CORS
 app.use(cors(corsOptions));
 
-//Middleware spécifique pour forcer CORS sur les requêtes `OPTIONS`
+// Middleware spécifique pour gérer les requêtes `OPTIONS` (préflight)
 app.options("*", cors(corsOptions));
 
-//Middleware pour forcer les en-têtes CORS sur toutes les requêtes
+// Forcer les en-têtes CORS sur chaque réponse
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
 
-  //Répondre immédiatement aux requêtes préflight `OPTIONS`
-  if (req.method === "OPTIONS") {
-    return res.status(200).send();
-  }
+    if (req.method === "OPTIONS") {
+        return res.status(204).send(); // Réponse vide avec code 204
+    }
 
-  next();
+    next();
 });
 
-//Middleware JSON
+// Middleware JSON
 app.use(express.json());
 
-//Connexion MongoDB
+// Connexion MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connexion réussie à MongoDB Atlas"))
-  .catch((err) => console.error("Erreur de connexion à MongoDB :", err));
+    .then(() => console.log("✅ Connexion réussie à MongoDB Atlas"))
+    .catch(err => console.error("❌ Erreur de connexion MongoDB :", err));
 
-//Déclaration des routes API
+// Vérification que MongoDB est bien connecté avant de lancer le serveur
+mongoose.connection.on("error", (err) => {
+    console.error("❌ Erreur MongoDB détectée :", err);
+});
+
+// Routes API
 app.use("/api", authRoutes);
 app.use("/api", catwayRoutes);
 app.use("/api", reservationRoutes);
 app.use("/api", userRoutes);
 
-//Lancement du serveur
+// Gestion des erreurs globales
+app.use((err, req, res, next) => {
+    console.error("❌ Erreur serveur :", err.message);
+    res.status(500).json({ error: "Erreur interne du serveur" });
+});
+
+// Démarrage du serveur
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Serveur démarré sur port ${PORT}`));
 
 export default app;
