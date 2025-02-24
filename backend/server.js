@@ -20,20 +20,22 @@ const allowedOrigins = [
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true); // Autoriser l'accès
+      callback(null, true); // Origine autorisée
     } else {
-      console.error("❌ Origine non autorisée par CORS :", origin);
+      console.error("❌ Origine non autorisée :", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-  credentials: true // Permet l'envoi des cookies et headers d'authentification
+  credentials: true // Autorise l'envoi des cookies et tokens d'authentification
 };
 
-// Activation CORS globalement
+// Activation de CORS globalement
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Gestion des requêtes préflight `OPTIONS`
+
+// Middleware spécifique pour les requêtes préflight OPTIONS
+app.options("*", cors(corsOptions));
 
 // Middleware global pour forcer les en-têtes CORS
 app.use((req, res, next) => {
@@ -45,8 +47,9 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Credentials", "true");
   }
 
+  // Répondre immédiatement aux requêtes `OPTIONS` (préflight)
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
+    return res.sendStatus(204);
   }
 
   next();
@@ -69,7 +72,7 @@ app.use("/api", userRoutes);
 // Gestion des erreurs globales
 app.use((err, req, res, next) => {
   console.error("❌ Erreur serveur :", err.message);
-  res.status(500).json({ error: "Erreur interne du serveur" });
+  res.status(500).json({ error: "Erreur interne du serveur", details: err.message });
 });
 
 // Lancement du serveur
