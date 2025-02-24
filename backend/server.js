@@ -10,19 +10,19 @@ import userRoutes from "./user.routes.js";
 dotenv.config();
 const app = express();
 
-// Liste des origines autorisées (Frontend)
+// Liste des origines autorisées (Frontend et Local)
 const allowedOrigins = [
-    "http://localhost:3000",  // Dev local
+    "http://localhost:3000",  // Développement local
     "https://port-de-plaisance-d81r.onrender.com"  // Frontend en production
 ];
 
-// Configuration CORS
+// Configuration CORS améliorée
 const corsOptions = {
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            console.error(`❌ CORS bloqué pour cette origine : ${origin}`);
+            console.error(`❌ CORS bloqué pour l'origine non autorisée : ${origin}`);
             callback(new Error("Not allowed by CORS"));
         }
     },
@@ -31,13 +31,10 @@ const corsOptions = {
     credentials: true
 };
 
-// Activation CORS
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Gestion OPTIONS (préflight requests)
 
-// Middleware spécifique pour gérer les requêtes `OPTIONS` (préflight)
-app.options("*", cors(corsOptions));
-
-// Forcer les en-têtes CORS sur chaque réponse
+// Middleware global pour forcer CORS sur toutes les réponses
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
@@ -45,7 +42,7 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Credentials", "true");
 
     if (req.method === "OPTIONS") {
-        return res.status(204).send(); // Réponse vide avec code 204
+        return res.status(204).send();
     }
 
     next();
@@ -54,23 +51,30 @@ app.use((req, res, next) => {
 // Middleware JSON
 app.use(express.json());
 
-// Connexion MongoDB
+// Connexion MongoDB avec meilleure gestion des erreurs
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("✅ Connexion réussie à MongoDB Atlas"))
-    .catch(err => console.error("❌ Erreur de connexion MongoDB :", err));
+    .catch(err => {
+        console.error("❌ Erreur de connexion MongoDB :", err);
+        process.exit(1); // Quitte le serveur si MongoDB ne se connecte pas
+    });
 
-// Vérification que MongoDB est bien connecté avant de lancer le serveur
 mongoose.connection.on("error", (err) => {
     console.error("❌ Erreur MongoDB détectée :", err);
 });
 
 // Routes API
-app.use("/api", authRoutes);
-app.use("/api", catwayRoutes);
-app.use("/api", reservationRoutes);
-app.use("/api", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/catways", catwayRoutes);
+app.use("/api/reservations", reservationRoutes);
+app.use("/api/users", userRoutes);
 
-// Gestion des erreurs globales
+// Route test pour vérifier si l'API fonctionne
+app.get("/api/status", (req, res) => {
+    res.json({ message: "🚀 API en ligne et fonctionnelle !" });
+});
+
+// Gestion globale des erreurs
 app.use((err, req, res, next) => {
     console.error("❌ Erreur serveur :", err.message);
     res.status(500).json({ error: "Erreur interne du serveur" });
