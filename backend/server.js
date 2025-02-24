@@ -10,37 +10,39 @@ import userRoutes from "./user.routes.js";
 dotenv.config();
 const app = express();
 
-// Configuration stricte de CORS
+// Définition des origines autorisées
 const allowedOrigins = [
-  "http://localhost:3000", // Dev local
-  "https://port-de-plaisance-d81r.onrender.com" // Frontend en production
+  "http://localhost:3000", // Frontend local
+  "https://port-de-plaisance-d81r.onrender.com" // Frontend déployé
 ];
 
+// Configuration stricte de CORS
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+      callback(null, true); // Autoriser l'accès
     } else {
+      console.error("❌ Origine non autorisée par CORS :", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-  credentials: true, // Permet l'envoi des cookies et headers d'authentification
+  credentials: true // Permet l'envoi des cookies et headers d'authentification
 };
 
-// Activation de CORS sur toutes les requêtes
+// Activation CORS globalement
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Pour les requêtes préflight
+app.options("*", cors(corsOptions)); // Gestion des requêtes préflight `OPTIONS`
 
 // Middleware global pour forcer les en-têtes CORS
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-    res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
   }
 
   if (req.method === "OPTIONS") {
@@ -64,7 +66,7 @@ app.use("/api", catwayRoutes);
 app.use("/api", reservationRoutes);
 app.use("/api", userRoutes);
 
-// Gestion des erreurs globales (évite les erreurs 500 sans logs)
+// Gestion des erreurs globales
 app.use((err, req, res, next) => {
   console.error("❌ Erreur serveur :", err.message);
   res.status(500).json({ error: "Erreur interne du serveur" });
@@ -72,6 +74,9 @@ app.use((err, req, res, next) => {
 
 // Lancement du serveur
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Serveur démarré sur http://localhost:${PORT} ou ${process.env.BASE_URL}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
+  console.log(`🌍 Environnement: ${process.env.NODE_ENV || "development"}`);
+});
 
 export default app;
